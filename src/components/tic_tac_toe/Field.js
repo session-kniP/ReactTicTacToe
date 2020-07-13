@@ -8,6 +8,8 @@ const Symbol = util.Symbol;
 const Color = util.Color;
 
 class Field extends React.Component {
+    static contextType = TicTacToeContext.app;
+
     constructor(props) {
         super(props);
 
@@ -24,7 +26,7 @@ class Field extends React.Component {
             const row = [];
             for (let j = 0; j < 3; j++) {
                 row.push({
-                    marker: util.Symbol.NONE,
+                    marker: Symbol.NONE,
                     comp: <Cell key={Math.random()} row={i} col={j} />,
                 });
             }
@@ -33,12 +35,12 @@ class Field extends React.Component {
 
         this.state = {
             cells: cells,
-            currentSymbol: util.Symbol.X,
+            currentSymbol: Symbol.X,
         };
     }
 
     markCell(row, col) {
-        if (this.state.cells[row][col].marker === util.Symbol.NONE) {
+        if (this.state.cells[row][col].marker === Symbol.NONE) {
             // const tempArr = JSON.parse(JSON.stringify(this.state.cells));
             const tempArr = this.state.cells.slice(0);
 
@@ -46,7 +48,9 @@ class Field extends React.Component {
 
             const newSymbol = this.switchCurrentSymbol();
             this.setState({ cells: tempArr, currentSymbol: newSymbol });
-            this.processGameState();
+            if (this.processGameState()) {
+                this.context.endGame(this.state.currentSymbol);
+            }
         }
     }
 
@@ -56,7 +60,6 @@ class Field extends React.Component {
 
     processGameState() {
         if (this.checkRows() || this.checkCols() || this.checkDiags()) {
-            console.log('WIN!!!');
             return true;
         }
         return false;
@@ -64,30 +67,69 @@ class Field extends React.Component {
 
     checkRows() {
         for (let row = 0; row < this.state.cells.length; row++) {
-            let current = this.state.cells[row][0].marker;
-            for (let pos = 1; pos < this.state.cells[row].length; pos++) {
-                if (this.state.cells[row][pos].marker !== current) {
-                    console.log(row, pos, current, this.state.cells[row][pos].marker);
-                    return false;
-                    
-                }
+            const currentRow = this.state.cells[row];
+            if (
+                currentRow.filter(
+                    (e) =>
+                        e.marker === currentRow[0].marker &&
+                        e.marker !== Symbol.NONE
+                ).length === currentRow.length
+            ) {
+                return true;
             }
         }
+        return false;
     }
 
     checkCols() {
-        for (let col = 0; col < this.state.cells[0].length; col++) {
-            for(let pos = 1; pos < this.state.cells.length; pos++) {
-                let current = this.state.cells[pos][col].marker;
-                if (this.state.cells[pos][col].marker !== current) {
-                    return false;
-                }
+        for (let col = 0; col < this.state.cells.length; col++) {
+            const currentCol = this.state.cells.map((row) => row[col]);
+
+            if (
+                currentCol.filter(
+                    (e) =>
+                        e.marker === currentCol[0].marker &&
+                        e.marker !== Symbol.NONE
+                ).length === currentCol.length
+            ) {
+                return true;
             }
         }
+        return false;
     }
 
     checkDiags() {
+        let cells = this.state.cells;
+        //major diagonal
+        let diagonal = util.getDiagonal(cells);
 
+        console.log(diagonal);
+
+        if (
+            diagonal.filter(
+                (el) =>
+                    el.marker === diagonal[0].marker &&
+                    el.marker !== Symbol.NONE
+            ).length === diagonal.length
+        ) {
+            return true;
+        }
+
+        //minor diagonal
+        cells = cells.reverse();
+        diagonal = util.getDiagonal(cells);
+
+        if (
+            diagonal.filter(
+                (el) =>
+                    el.marker === diagonal[0].marker &&
+                    el.marker !== Symbol.NONE
+            ).length === diagonal.length
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
     render() {

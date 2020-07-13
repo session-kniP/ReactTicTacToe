@@ -1,7 +1,7 @@
 const util = {
     GameStatus: Object.freeze({
-        READY: 0,
-        STARTED: 1,
+        STARTED: 0,
+        ENDED: 1,
     }),
     Symbol: Object.freeze({
         X: 'x',
@@ -18,6 +18,11 @@ const util = {
             return `rgb(${r}, ${g}, ${b}, ${a})`;
         },
     }),
+    getDiagonal(matrix) {
+        return matrix.map(
+            (row, rowIdx) => row.filter((el, colIdx) => rowIdx === colIdx)[0]
+        );
+    }
 };
 
 export default util;

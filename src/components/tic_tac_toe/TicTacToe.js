@@ -3,7 +3,7 @@ import Field from './Field';
 import TicTacToeContext from './TicTacToeContext';
 import '../../styles/TicTacToe.css';
 import util from './util';
-import PropTypes, { objectOf } from 'prop-types';
+import PropTypes from 'prop-types';
 
 const GameStatus = util.GameStatus;
 
@@ -11,8 +11,11 @@ class TicTacToe extends React.Component {
     constructor(props) {
         super(props);
 
+        this.endGame = this.endGame.bind(this);
+        this.changeStatus = this.changeStatus.bind(this);
+
         this.state = {
-            gameStatus: GameStatus.READY,
+            gameStatus: GameStatus.STARTED,
         };
     }
 
@@ -20,18 +23,23 @@ class TicTacToe extends React.Component {
         this.setState({ gameStatus: status });
     }
 
+    endGame(symbol) {
+        this.changeStatus(GameStatus.ENDED);
+        alert(`${symbol} WINS!!!`);
+    }
+
     render() {
         return (
-            <div>
+            <TicTacToeContext.app.Provider value={{endGame: this.endGame}}>
                 <div className="title"></div>
                 <Field key={Math.random()} siz={'Saizik'} />
-            </div>
+            </TicTacToeContext.app.Provider>
         );
     }
 }
 
 TicTacToe.propTypes = {
-    status: objectOf(GameStatus),
+    status: PropTypes.objectOf(GameStatus),
 };
 
 export default TicTacToe;
